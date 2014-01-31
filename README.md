@@ -28,7 +28,7 @@ Drag the `JPSImagePickerController` folder into your project and link the MediaP
 
 Just launch it modally and set its delegate:
 
-```smalltalk
+```objective-c
 JPSImagePickerController *imagePicker = [[JPSImagePickerController alloc] init];
 imagePicker.delegate = self;
 [self presentViewController:imagePicker animated:YES completion:nil];
@@ -36,7 +36,7 @@ imagePicker.delegate = self;
 
 Its delegate can respond to the following methods:
 
-```smalltalk
+```objective-c
 // Called immediately after the picture was taken
 - (void)picker:(JPSImagePickerController *)picker didTakePicture:(UIImage *)picture;
 // Called immediately after the "Use" button was tapped
