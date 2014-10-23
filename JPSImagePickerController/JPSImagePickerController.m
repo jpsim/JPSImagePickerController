@@ -332,7 +332,9 @@
 }
 
 - (void)dismiss {
-    [self dismissViewControllerAnimated:YES completion:nil];
+    if ([self.delegate respondsToSelector:@selector(pickerDidCancel:)]) {
+        [self.delegate pickerDidCancel:self];
+    }
 }
 
 - (void)didPressFlashButton {

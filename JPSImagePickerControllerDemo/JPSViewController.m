@@ -85,18 +85,22 @@
 
 - (void)picker:(JPSImagePickerController *)picker didTakePicture:(UIImage *)picture {
     picker.confirmationString = @"Zoom in to make sure you're happy with your picture";
-    picker.confirmationOverlayString = @"Analyzing Image...";
-    picker.confirmationOverlayBackgroundColor = [UIColor orangeColor];
+    picker.confirmationOverlayString = @"";
+    picker.confirmationOverlayBackgroundColor = [UIColor clearColor];
     double delayInSeconds = 1;
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
     dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-        picker.confirmationOverlayString = @"Good Quality";
-        picker.confirmationOverlayBackgroundColor = [UIColor colorWithRed:0 green:0.8f blue:0 alpha:1.0f];
+        picker.confirmationOverlayString = @"";
+        picker.confirmationOverlayBackgroundColor = [UIColor clearColor];
     });
 }
 
 - (void)picker:(JPSImagePickerController *)picker didConfirmPicture:(UIImage *)picture {
     self.imageView.image = picture;
+}
+
+- (void)pickerDidCancel:(JPSImagePickerController *)picker {
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 @end
