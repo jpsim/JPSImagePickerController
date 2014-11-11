@@ -46,5 +46,7 @@
 - (void)picker:(JPSImagePickerController *)picker didTakePicture:(UIImage *)picture;
 // Called immediately after the "Use" button was tapped
 - (void)picker:(JPSImagePickerController *)picker didConfirmPicture:(UIImage *)picture;
+// Called immediately after the "Cancel" button was tapped
+- (void)pickerDidCancel:(JPSImagePickerController *)picker;
 
 @end

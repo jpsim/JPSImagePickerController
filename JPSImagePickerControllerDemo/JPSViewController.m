@@ -99,4 +99,8 @@
     self.imageView.image = picture;
 }
 
+- (void)pickerDidCancel:(JPSImagePickerController *)picker {
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
 @end

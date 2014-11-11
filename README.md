@@ -41,6 +41,8 @@ Its delegate can respond to the following methods:
 - (void)picker:(JPSImagePickerController *)picker didTakePicture:(UIImage *)picture;
 // Called immediately after the "Use" button was tapped
 - (void)picker:(JPSImagePickerController *)picker didConfirmPicture:(UIImage *)picture;
+// Called immediately after the "Cancel" button was tapped
+- (void)pickerDidCancel:(JPSImagePickerController *)picker;
 ```
 
 See sample Xcode project for more examples on how to configure.
