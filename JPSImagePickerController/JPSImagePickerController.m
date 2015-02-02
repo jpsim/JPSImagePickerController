@@ -47,6 +47,7 @@
         self.editingEnabled = YES;
         self.zoomEnabled = YES;
         self.volumeButtonTakesPicture = YES;
+        self.flashlightEnabled = YES;
     }
     return self;
 }
@@ -165,7 +166,7 @@
     self.flashButton.translatesAutoresizingMaskIntoConstraints = NO;
     UIImage *flashButtonImage = [[UIImage imageNamed:@"JPSImagePickerController.bundle/flash_button"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
     [self.flashButton setImage:flashButtonImage forState:UIControlStateNormal];
-    [self.flashButton setTitle:@" On" forState:UIControlStateNormal];
+    [self setupFlashButtonForFlashlightEnabled:self.flashlightEnabled];
     [self.flashButton addTarget:self action:@selector(didPressFlashButton) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.flashButton];
     
@@ -212,6 +213,30 @@
 
 - (BOOL)prefersStatusBarHidden {
     return YES;
+}
+
+#pragma mark - Other
+
+- (void)changeFlashlightEnabled:(BOOL)flashlightEnabled {
+    
+    // Expand to show flash modes
+    AVCaptureDevice *device = [self currentDevice];
+    NSError *error = nil;
+    // Turn on point autofocus for middle of view
+    [device lockForConfiguration:&error];
+    if (!error) {
+        if (flashlightEnabled) {
+            device.flashMode = AVCaptureFlashModeOn;
+        } else {
+            device.flashMode = AVCaptureFlashModeOff;
+        }
+    }
+    [device unlockForConfiguration];
+}
+
+- (void)setupFlashButtonForFlashlightEnabled:(BOOL)isFlashlightEnabled {
+    NSString *flashlightButtonTitle = isFlashlightEnabled ? @" On" : @" Off";
+    [self.flashButton setTitle:flashlightButtonTitle forState:UIControlStateNormal];
 }
 
 #pragma mark - AVCapture
@@ -276,7 +301,9 @@
         [self.view insertSubview:self.capturePreviewView atIndex:0];
         [self.capturePreviewView.layer addSublayer:self.capturePreviewLayer];
         [self.session startRunning];
-        if ([[self currentDevice] hasFlash]) {
+        AVCaptureDevice *currentDevice = [self currentDevice];
+        if ([currentDevice hasFlash]) {
+            [self changeFlashlightEnabled:self.flashlightEnabled];
             self.flashButton.hidden = NO;
         }
         if ([UIImagePickerController isCameraDeviceAvailable:UIImagePickerControllerCameraDeviceFront] &&
@@ -338,21 +365,11 @@
 }
 
 - (void)didPressFlashButton {
-    // Expand to show flash modes
-    AVCaptureDevice *device = [self currentDevice];
-    NSError *error = nil;
-    // Turn on point autofocus for middle of view
-    [device lockForConfiguration:&error];
-    if (!error) {
-        if (device.flashMode == AVCaptureFlashModeOff) {
-            device.flashMode = AVCaptureFlashModeOn;
-            [self.flashButton setTitle:@" On" forState:UIControlStateNormal];
-        } else {
-            device.flashMode = AVCaptureFlashModeOff;
-            [self.flashButton setTitle:@" Off" forState:UIControlStateNormal];
-        }
-    }
-    [device unlockForConfiguration];
+    BOOL flashlightDisabled = [self currentDevice].flashMode == AVCaptureFlashModeOff;
+    
+    self.flashlightEnabled = flashlightDisabled;
+    [self setupFlashButtonForFlashlightEnabled:flashlightDisabled];
+    [self changeFlashlightEnabled:flashlightDisabled];
 }
 
 - (void)didPressCameraSwitchButton {

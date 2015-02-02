@@ -78,6 +78,7 @@
 - (void)launchImagePicker {
     JPSImagePickerController *imagePicker = [[JPSImagePickerController alloc] init];
     imagePicker.delegate = self;
+    imagePicker.flashlightEnabled = NO;
     [self presentViewController:imagePicker animated:YES completion:nil];
 }
 
