@@ -20,7 +20,7 @@
 @property (nonatomic, assign) BOOL zoomEnabled;
 // Volume up button as trigger enabled, default YES
 @property (nonatomic, assign) BOOL volumeButtonTakesPicture;
-// Initial value for flashlight switch, default YES
+// State of flashlight toggle, default YES
 @property (nonatomic, assign, getter=isFlashlightEnabled) BOOL flashlightEnabled;
 
 #pragma mark - Confirmation Overlay Options
