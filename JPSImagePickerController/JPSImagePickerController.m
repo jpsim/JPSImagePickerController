@@ -266,6 +266,7 @@
 - (NSBlockOperation *)captureOperation {
     NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
         self.session = [[AVCaptureSession alloc] init];
+        self.session.sessionPreset = AVCaptureSessionPresetPhoto;
         AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
         NSError *error = nil;
         
