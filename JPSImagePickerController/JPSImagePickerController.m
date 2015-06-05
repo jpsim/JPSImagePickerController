@@ -161,7 +161,7 @@
 
     if (![self currentDevice]) return;
 
-    NSString *flashlightButtonTitle = self.isFlashlightEnabled ? @" 闪光灯开启" : @" 闪光灯关闭";
+    NSString *flashlightButtonTitle = self.isFlashlightEnabled ? @" ON" : @" OFF";
     [self.flashButton setTitle:flashlightButtonTitle forState:UIControlStateNormal];
 
     // Expand to show flash modes
@@ -224,7 +224,7 @@
     self.cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
     self.cancelButton.titleLabel.font = [UIFont systemFontOfSize:18.0f];
     self.cancelButton.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.cancelButton setTitle:@"取消" forState:UIControlStateNormal];
+    [self.cancelButton setTitle:@"Cancel" forState:UIControlStateNormal];
     [self.cancelButton addTarget:self action:@selector(dismiss) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.cancelButton];
 
@@ -532,7 +532,7 @@
     self.retakeButton = [UIButton buttonWithType:UIButtonTypeSystem];
     self.retakeButton.titleLabel.font = [UIFont systemFontOfSize:18.0f];
     self.retakeButton.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.retakeButton setTitle:@"重拍" forState:UIControlStateNormal];
+    [self.retakeButton setTitle:@"Retake" forState:UIControlStateNormal];
     [self.retakeButton addTarget:self action:@selector(retake) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.retakeButton];
 
@@ -561,7 +561,7 @@
     self.useButton = [UIButton buttonWithType:UIButtonTypeSystem];
     self.useButton.titleLabel.font = [UIFont systemFontOfSize:18.0f];
     self.useButton.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.useButton setTitle:@"使用照片" forState:UIControlStateNormal];
+    [self.useButton setTitle:@"Use Photo" forState:UIControlStateNormal];
     [self.useButton addTarget:self action:@selector(use) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.useButton];
 
