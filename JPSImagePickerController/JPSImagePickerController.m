@@ -390,11 +390,6 @@
 
 - (void)takePicture {
     if (!self.cameraButton.enabled) return;
-    // self.session.sessionPreset = AVCaptureSessionPresetHigh;
-    // self.session.sessionPreset = AVCaptureSessionPreset1280x720;
-
-
-    // AVCaptureDevice *device = [self currentDevice];
 
     AVCaptureStillImageOutput *output = self.session.outputs.lastObject;
     AVCaptureConnection *videoConnection = output.connections.lastObject;
@@ -422,61 +417,8 @@
                                             }
                                         }];
 
-    // int flags = NSKeyValueObservingOptionNew;
-    // [device addObserver:self forKeyPath:@"adjustingExposure" options:flags context:nil];
-    /*[device addObserver:self forKeyPath:@"adjustingFocus" options:NSKeyValueObservingOptionNew context:MyAdjustingFocusObservationContext];
-     */
-    /*[device addObserver:self forKeyPath:@"adjustingWhiteBalance" options:NSKeyValueObservingOptionNew context:MyAdjustingWhiteBalanceObservationContext];*/
-    /*
-
-    while(device.isAdjustingExposure || device.isAdjustingFocus || device.isAdjustingWhiteBalance)
-    {
-        ;
-    }
-     */
-
-    // self.captureSession.sessionPreset = AVCaptureSessionPresetPhoto
-
     self.cameraButton.enabled = NO;
 
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if( [keyPath isEqualToString:@"adjustingExposure"] ){
-        BOOL adjustingFocus = [ [change objectForKey:NSKeyValueChangeNewKey] isEqualToNumber:[NSNumber numberWithInt:1] ];
-        NSLog(@"Is adjusting exposure? %@", adjustingFocus ? @"YES" : @"NO" );
-
-        if (!adjustingFocus)
-        {
-            /*
-            AVCaptureStillImageOutput *output = self.session.outputs.lastObject;
-            AVCaptureConnection *videoConnection = output.connections.lastObject;
-            if (!videoConnection) return;
-
-            [output captureStillImageAsynchronouslyFromConnection:videoConnection
-                                                completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
-                                                    if (!imageDataSampleBuffer || error) return;
-
-                                                    NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
-                                                    self.imageOrientation = [JPSImagePickerController currentImageOrientation:self.deviceOrientation];
-                                                    UIImage *image = [UIImage imageWithCGImage:[[[UIImage alloc] initWithData:imageData] CGImage]
-                                                                                         scale:1.0f
-                                                                                   orientation:self.imageOrientation];
-                                                    self.previewImage = image;
-                                                    if (self.editingEnabled) {
-                                                        [self showPreview];
-                                                    } else {
-                                                        [self dismiss];
-                                                    }
-                                                    if ([self.delegate respondsToSelector:@selector(picker:didTakePicture:)]) {
-                                                        [self.delegate picker:self didTakePicture:image];
-                                                    }
-                                                }];
-             */
-            [[self currentDevice] removeObserver:self forKeyPath:@"adjustingExposure"];
-        }
-        NSLog(@"Change dictionary: %@", change);
-    }
 }
 
 
