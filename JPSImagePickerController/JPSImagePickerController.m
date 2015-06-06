@@ -61,9 +61,9 @@
     [self addCancelButton];
     [self addFlashButton];
     [self addCameraSwitchButton];
+}
 
-
-
+- (void)viewDidLoad {
     self.motionManager = [[CMMotionManager alloc] init];
     self.motionManager.accelerometerUpdateInterval = .2;
 
@@ -161,7 +161,7 @@
 
     if (![self currentDevice]) return;
 
-    NSString *flashlightButtonTitle = self.isFlashlightEnabled ? @" ON" : @" OFF";
+    NSString *flashlightButtonTitle = self.isFlashlightEnabled ? @" On" : @" Off";
     [self.flashButton setTitle:flashlightButtonTitle forState:UIControlStateNormal];
 
     // Expand to show flash modes
@@ -561,7 +561,7 @@
     self.useButton = [UIButton buttonWithType:UIButtonTypeSystem];
     self.useButton.titleLabel.font = [UIFont systemFontOfSize:18.0f];
     self.useButton.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.useButton setTitle:@"Use Photo" forState:UIControlStateNormal];
+    [self.useButton setTitle:@"Use" forState:UIControlStateNormal];
     [self.useButton addTarget:self action:@selector(use) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.useButton];
 
@@ -723,7 +723,6 @@
 + (UIImageOrientation)currentImageOrientation:(UIDeviceOrientation)deviceOrientation {
     // This is weird, but it works
     // By all means fix it, but make sure to test it afterwards
-    //UIDeviceOrientation deviceOrientation = deviceOrientation/*[[UIDevice currentDevice] orientation]*/;
     UIImageOrientation imageOrientation = UIImageOrientationRight;
 
     switch (deviceOrientation) {
