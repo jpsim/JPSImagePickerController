@@ -7,10 +7,15 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <CoreMotion/CoreMotion.h>
 
 @protocol JPSImagePickerDelegate;
 
 @interface JPSImagePickerController : UIViewController
+
+#pragma mark - Device Orientation Related
+@property (strong, nonatomic) CMMotionManager *motionManager;
+@property (readwrite, nonatomic) UIDeviceOrientation deviceOrientation;
 
 #pragma mark - Feature Flags
 
@@ -50,5 +55,7 @@
 - (void)picker:(JPSImagePickerController *)picker didConfirmPicture:(UIImage *)picture;
 // Called immediately after the "Cancel" button was tapped
 - (void)pickerDidCancel:(JPSImagePickerController *)picker;
+
+
 
 @end
