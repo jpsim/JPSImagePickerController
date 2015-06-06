@@ -63,6 +63,53 @@
     [self addCameraSwitchButton];
 }
 
+- (void)viewDidLoad {
+    self.motionManager = [[CMMotionManager alloc] init];
+    self.motionManager.accelerometerUpdateInterval = .2;
+
+    [self.motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue currentQueue]
+                                             withHandler:^(CMAccelerometerData  *accelerometerData, NSError *error) {
+                                                 [self outputAccelertionData:accelerometerData.acceleration];
+                                                 if(error){
+
+                                                     NSLog(@"%@", error);
+                                                 }
+                                             }];
+}
+
+
+
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [self.motionManager stopAccelerometerUpdates];
+}
+
+-(void)outputAccelertionData:(CMAcceleration)acceleration
+{
+    // Get the current device angle
+    float xx = -acceleration.x;
+    float yy = acceleration.y;
+    float angle = atan2(yy, xx);
+
+    if(angle >= -2.25 && angle <= -0.75)
+    {
+        self.deviceOrientation = UIDeviceOrientationPortrait;
+
+    }
+    else if(angle >= -0.75 && angle <= 0.75)
+    {
+        self.deviceOrientation = UIDeviceOrientationLandscapeRight;
+    }
+    else if(angle >= 0.75 && angle <= 2.25)
+    {
+        self.deviceOrientation = UIDeviceOrientationPortraitUpsideDown;
+    }
+    else if(angle <= -2.25 || angle >= 2.25)
+    {
+        self.deviceOrientation = UIDeviceOrientationLandscapeLeft;
+    }
+}
+
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     [self enableCapture];
@@ -71,7 +118,10 @@
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     [self addVolumeButtonHandler];
+
+
 }
+
 
 - (void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
@@ -108,12 +158,12 @@
 #pragma mark - Other
 
 - (void)updateFlashlightState {
-    
+
     if (![self currentDevice]) return;
-    
+
     NSString *flashlightButtonTitle = self.isFlashlightEnabled ? @" On" : @" Off";
     [self.flashButton setTitle:flashlightButtonTitle forState:UIControlStateNormal];
-    
+
     // Expand to show flash modes
     AVCaptureDevice *device = [self currentDevice];
     NSError *error = nil;
@@ -137,7 +187,7 @@
     self.cameraButton.translatesAutoresizingMaskIntoConstraints = NO;
     [self.cameraButton addTarget:self action:@selector(takePicture) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.cameraButton];
-    
+
     // Constraints
     NSLayoutConstraint *horizontal = [NSLayoutConstraint constraintWithItem:self.cameraButton
                                                                   attribute:NSLayoutAttributeCenterX
@@ -177,7 +227,7 @@
     [self.cancelButton setTitle:@"Cancel" forState:UIControlStateNormal];
     [self.cancelButton addTarget:self action:@selector(dismiss) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.cancelButton];
-    
+
     NSLayoutConstraint *left = [NSLayoutConstraint constraintWithItem:self.cancelButton
                                                             attribute:NSLayoutAttributeLeft
                                                             relatedBy:NSLayoutRelationEqual
@@ -202,7 +252,7 @@
     [self.flashButton setImage:flashButtonImage forState:UIControlStateNormal];
     [self.flashButton addTarget:self action:@selector(didPressFlashButton) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.flashButton];
-    
+
     NSLayoutConstraint *left = [NSLayoutConstraint constraintWithItem:self.flashButton
                                                             attribute:NSLayoutAttributeLeft
                                                             relatedBy:NSLayoutRelationEqual
@@ -226,7 +276,7 @@
     [self.cameraSwitchButton setBackgroundImage:[UIImage imageNamed:@"JPSImagePickerController.bundle/camera_switch_button"] forState:UIControlStateNormal];
     [self.cameraSwitchButton addTarget:self action:@selector(didPressCameraSwitchButton) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.cameraSwitchButton];
-    
+
     NSLayoutConstraint *right = [NSLayoutConstraint constraintWithItem:self.cameraSwitchButton
                                                              attribute:NSLayoutAttributeRight
                                                              relatedBy:NSLayoutRelationEqual
@@ -252,7 +302,7 @@
 
 - (void)enableCapture {
     if (self.session) return;
-    
+
     self.flashButton.hidden = YES;
     self.cameraSwitchButton.hidden = YES;
     NSBlockOperation *operation = [self captureOperation];
@@ -269,12 +319,12 @@
         self.session.sessionPreset = AVCaptureSessionPresetPhoto;
         AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
         NSError *error = nil;
-        
+
         AVCaptureDeviceInput *input = [AVCaptureDeviceInput deviceInputWithDevice:device error:&error];
         if (!input) return;
-        
+
         [self.session addInput:input];
-        
+
         // Turn on point autofocus for middle of view
         [device lockForConfiguration:&error];
         if (!error) {
@@ -287,11 +337,11 @@
             }
         }
         [device unlockForConfiguration];
-        
+
         self.capturePreviewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.session];
         self.capturePreviewLayer.frame = CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height - 69.0f - 73.0f);
         self.capturePreviewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
-        
+
         // Still Image Output
         AVCaptureStillImageOutput *stillOutput = [[AVCaptureStillImageOutput alloc] init];
         stillOutput.outputSettings = @{AVVideoCodecKey: AVVideoCodecJPEG};
@@ -340,21 +390,22 @@
 
 - (void)takePicture {
     if (!self.cameraButton.enabled) return;
-    
+
     AVCaptureStillImageOutput *output = self.session.outputs.lastObject;
     AVCaptureConnection *videoConnection = output.connections.lastObject;
     if (!videoConnection) return;
-    
-    self.cameraButton.enabled = NO;
+
     [output captureStillImageAsynchronouslyFromConnection:videoConnection
                                         completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
                                             if (!imageDataSampleBuffer || error) return;
-                                            
+
                                             NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
-                                            self.imageOrientation = [JPSImagePickerController currentImageOrientation];
+                                            self.imageOrientation = [JPSImagePickerController currentImageOrientation:self.deviceOrientation];
+
                                             UIImage *image = [UIImage imageWithCGImage:[[[UIImage alloc] initWithData:imageData] CGImage]
                                                                                  scale:1.0f
                                                                            orientation:self.imageOrientation];
+
                                             self.previewImage = image;
                                             if (self.editingEnabled) {
                                                 [self showPreview];
@@ -365,7 +416,11 @@
                                                 [self.delegate picker:self didTakePicture:image];
                                             }
                                         }];
+
+    self.cameraButton.enabled = NO;
+
 }
+
 
 - (void)dismiss {
     if ([self.delegate respondsToSelector:@selector(pickerDidCancel:)]) {
@@ -380,30 +435,30 @@
 - (void)didPressCameraSwitchButton {
     if (!self.session) return;
     [self.session stopRunning];
-    
+
     // Input Switch
     NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
         AVCaptureDevice *frontCamera = [self frontCamera];
         AVCaptureDevice *backCamera = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
         AVCaptureDeviceInput *input = self.session.inputs.firstObject;
-        
+
         AVCaptureDevice *newCamera = nil;
-        
+
         if (input.device.position == AVCaptureDevicePositionBack) {
             newCamera = frontCamera;
         } else {
             newCamera = backCamera;
         }
-        
+
         // Should the flash button still be displayed?
         dispatch_async(dispatch_get_main_queue(), ^{
             self.flashButton.hidden = !newCamera.isFlashAvailable;
         });
-        
+
         // Remove previous camera, and add new
         [self.session removeInput:input];
         NSError *error = nil;
-        
+
         input = [AVCaptureDeviceInput deviceInputWithDevice:newCamera error:&error];
         if (!input) return;
         [self.session addInput:input];
@@ -416,7 +471,7 @@
     };
     operation.queuePriority = NSOperationQueuePriorityVeryHigh;
     [self.captureQueue addOperation:operation];
-    
+
     // Flip Animation
     [UIView transitionWithView:self.capturePreviewView
                       duration:1.0f
@@ -433,12 +488,12 @@
     self.flashButton.hidden = YES;
     self.cameraSwitchButton.hidden = YES;
     self.capturePreviewLayer.hidden = YES;
-    
+
     // Preview UI
     [self addPreview];
     [self addRetakeButton];
     [self addUseButton];
-    
+
     // Preview Top Area UI
     [self addConfirmationLabel];
     [self addConfirmationOverlayLabel];
@@ -454,7 +509,7 @@
     self.previewImageView.contentMode = UIViewContentModeScaleAspectFit;
     self.previewImageView.image = self.previewImage;
     self.previewImageView.clipsToBounds = YES;
-    
+
     UIScrollView *previewScrollView = [[UIScrollView alloc] initWithFrame:self.capturePreviewView.frame];
     previewScrollView.maximumZoomScale = 4.0f;
     previewScrollView.minimumZoomScale = 1.0f;
@@ -480,7 +535,7 @@
     [self.retakeButton setTitle:@"Retake" forState:UIControlStateNormal];
     [self.retakeButton addTarget:self action:@selector(retake) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.retakeButton];
-    
+
     NSLayoutConstraint *left = [NSLayoutConstraint constraintWithItem:self.retakeButton
                                                             attribute:NSLayoutAttributeLeft
                                                             relatedBy:NSLayoutRelationEqual
@@ -509,7 +564,7 @@
     [self.useButton setTitle:@"Use" forState:UIControlStateNormal];
     [self.useButton addTarget:self action:@selector(use) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.useButton];
-    
+
     NSLayoutConstraint *right = [NSLayoutConstraint constraintWithItem:self.useButton
                                                              attribute:NSLayoutAttributeRight
                                                              relatedBy:NSLayoutRelationEqual
@@ -547,7 +602,7 @@
     self.confirmationLabel.textColor = [UIColor whiteColor];
     self.confirmationLabel.text = self.confirmationString;
     [self.view addSubview:self.confirmationLabel];
-    
+
     NSLayoutConstraint *centerX = [NSLayoutConstraint constraintWithItem:self.confirmationLabel
                                                                attribute:NSLayoutAttributeCenterX
                                                                relatedBy:NSLayoutRelationEqual
@@ -587,7 +642,7 @@
     self.confirmationOverlayLabel.backgroundColor = self.confirmationOverlayBackgroundColor;
     self.confirmationOverlayLabel.text = self.confirmationOverlayString;
     [self.view addSubview:self.confirmationOverlayLabel];
-    
+
     NSLayoutConstraint *centerX = [NSLayoutConstraint constraintWithItem:self.confirmationOverlayLabel
                                                                attribute:NSLayoutAttributeCenterX
                                                                relatedBy:NSLayoutRelationEqual
@@ -639,16 +694,16 @@
     self.previewImageView.hidden = YES;
     self.retakeButton.hidden = YES;
     self.useButton.hidden = YES;
-    
+
     self.confirmationLabel.hidden = YES;
     self.confirmationOverlayLabel.hidden = YES;
-    
+
     self.cameraButton.hidden = NO;
     self.cancelButton.hidden = NO;
     self.flashButton.hidden = NO;
     self.cameraSwitchButton.hidden = NO;
     self.capturePreviewLayer.hidden = NO;
-    
+
     self.cameraButton.enabled = YES;
 }
 
@@ -665,29 +720,28 @@
     return UIInterfaceOrientationMaskPortrait;
 }
 
-+ (UIImageOrientation)currentImageOrientation {
++ (UIImageOrientation)currentImageOrientation:(UIDeviceOrientation)deviceOrientation {
     // This is weird, but it works
     // By all means fix it, but make sure to test it afterwards
-    UIDeviceOrientation deviceOrientation = [[UIDevice currentDevice] orientation];
     UIImageOrientation imageOrientation = UIImageOrientationRight;
-    
+
     switch (deviceOrientation) {
         case UIDeviceOrientationLandscapeLeft:
-            imageOrientation = UIImageOrientationUp;
-            break;
-            
-        case UIDeviceOrientationLandscapeRight:
             imageOrientation = UIImageOrientationDown;
             break;
-            
+
+        case UIDeviceOrientationLandscapeRight:
+            imageOrientation = UIImageOrientationUp;
+            break;
+
         case UIDeviceOrientationPortraitUpsideDown:
             imageOrientation = UIImageOrientationLeft;
             break;
-            
+
         default:
             break;
     }
-    
+
     return imageOrientation;
 }
 
