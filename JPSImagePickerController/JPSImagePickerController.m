@@ -37,6 +37,8 @@
 @property (nonatomic, strong) UILabel * confirmationLabel;
 @property (nonatomic, strong) UILabel * confirmationOverlayLabel;
 
+//Device Orientation
+@property (nonatomic, assign) UIDeviceOrientation lastDeviceOrientation;
 @end
 
 @implementation JPSImagePickerController
@@ -61,15 +63,14 @@
     [self addCancelButton];
     [self addFlashButton];
     [self addCameraSwitchButton];
-}
 
-- (void)viewDidLoad {
     self.motionManager = [[CMMotionManager alloc] init];
     self.motionManager.accelerometerUpdateInterval = .2;
 
     [self.motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue currentQueue]
                                              withHandler:^(CMAccelerometerData  *accelerometerData, NSError *error) {
                                                  [self outputAccelertionData:accelerometerData.acceleration];
+                                                 [self rotateButtons];
                                                  if(error){
 
                                                      NSLog(@"%@", error);
@@ -472,12 +473,16 @@
     operation.queuePriority = NSOperationQueuePriorityVeryHigh;
     [self.captureQueue addOperation:operation];
 
+    // disable button to avoid crash if the user spams the button
+    self.cameraSwitchButton.enabled = NO;
     // Flip Animation
     [UIView transitionWithView:self.capturePreviewView
                       duration:1.0f
                        options:UIViewAnimationOptionTransitionFlipFromLeft | UIViewAnimationOptionAllowAnimatedContent
                     animations:nil
-                    completion:nil];
+                    completion:^(BOOL finished) {
+                                self.cameraSwitchButton.enabled = YES;
+                            }];
 }
 
 #pragma mark - Preview UI
@@ -745,4 +750,40 @@
     return imageOrientation;
 }
 
+-(void)rotateButtons{
+    //check the last device orientation and apply a new rotation if the orientation has changed
+    if(self.lastDeviceOrientation == self.deviceOrientation){
+        return;
+    }
+    self.lastDeviceOrientation = self.deviceOrientation;
+    
+    double rotation = 0;
+    switch (self.lastDeviceOrientation) {
+        case UIDeviceOrientationPortrait:
+            rotation = 0;
+            break;
+        case UIDeviceOrientationPortraitUpsideDown:
+            rotation = M_PI;
+            break;
+        case UIDeviceOrientationLandscapeLeft:
+            rotation = -M_PI_2;
+            break;
+        case UIDeviceOrientationLandscapeRight:
+            rotation = M_PI_2;
+            break;
+        default:
+            break;
+    }
+    CGAffineTransform transform = CGAffineTransformMakeRotation(rotation);
+    [UIView animateWithDuration:0.4
+                          delay:0.0
+                        options:UIViewAnimationOptionBeginFromCurrentState
+                     animations:^{
+                         self.cameraButton.transform = transform;
+                         self.cameraSwitchButton.transform = transform;
+                         self.flashButton.transform = transform;
+                         self.cancelButton.transform = transform;
+                     }
+                     completion:nil];
+}
 @end
