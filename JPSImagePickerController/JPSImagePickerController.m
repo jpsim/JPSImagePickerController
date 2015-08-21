@@ -61,9 +61,7 @@
     [self addCancelButton];
     [self addFlashButton];
     [self addCameraSwitchButton];
-}
 
-- (void)viewDidLoad {
     self.motionManager = [[CMMotionManager alloc] init];
     self.motionManager.accelerometerUpdateInterval = .2;
 
@@ -472,12 +470,16 @@
     operation.queuePriority = NSOperationQueuePriorityVeryHigh;
     [self.captureQueue addOperation:operation];
 
+    // disable button to avoid crash if the user spams the button
+    self.cameraSwitchButton.enabled = NO;
     // Flip Animation
     [UIView transitionWithView:self.capturePreviewView
                       duration:1.0f
                        options:UIViewAnimationOptionTransitionFlipFromLeft | UIViewAnimationOptionAllowAnimatedContent
                     animations:nil
-                    completion:nil];
+                    completion:^(BOOL finished) {
+                                self.cameraSwitchButton.enabled = YES;
+                            }];
 }
 
 #pragma mark - Preview UI
