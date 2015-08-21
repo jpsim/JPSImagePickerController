@@ -37,6 +37,9 @@
 @property(nonatomic, strong) UILabel *confirmationLabel;
 @property(nonatomic, strong) UILabel *confirmationOverlayLabel;
 
+// Orientation Device
+@property(nonatomic, assign) UIDeviceOrientation oldDeviceOrientation;
+
 @end
 
 @implementation JPSImagePickerController
@@ -96,6 +99,10 @@
     self.deviceOrientation = UIDeviceOrientationPortraitUpsideDown;
   } else if (angle <= -2.25 || angle >= 2.25) {
     self.deviceOrientation = UIDeviceOrientationLandscapeLeft;
+  }
+  if (self.oldDeviceOrientation != self.deviceOrientation) {
+    [self changeButtonOrientation];
+    self.oldDeviceOrientation = self.deviceOrientation;
   }
 }
 
@@ -794,4 +801,37 @@
   return imageOrientation;
 }
 
+- (void)changeButtonOrientation {
+  UIDeviceOrientation orientation = self.deviceOrientation;
+  double rotation = 0;
+
+  switch (orientation) {
+    case UIDeviceOrientationPortrait:
+      rotation = 0;
+      break;
+    case UIDeviceOrientationPortraitUpsideDown:
+      rotation = M_PI;
+      break;
+    case UIDeviceOrientationLandscapeLeft:
+      rotation = -M_PI_2;
+      break;
+    case UIDeviceOrientationLandscapeRight:
+      rotation = M_PI_2;
+      break;
+    default:
+      return;
+  }
+  CGAffineTransform transform = CGAffineTransformMakeRotation(rotation);
+  [UIView animateWithDuration:0.4
+                        delay:0.0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     self.cameraButton.transform = transform;
+                     self.cameraSwitchButton.transform = transform;
+                     self.flashButton.transform = transform;
+                     self.cancelButton.transform = transform;
+
+                   }
+                   completion:nil];
+}
 @end
